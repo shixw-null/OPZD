@@ -158,3 +158,16 @@ def drop_user_table():
     except psycopg2.Error as e:
         print("Ошибка при удалении таблицы пользователей:", e)
   
+def get_user_id_by_username(username):
+    try:
+        conn = connect_to_database()
+        if conn:
+            cursor = conn.cursor()
+            select_query = "SELECT id FROM users WHERE username = %s"
+            cursor.execute(select_query, (username,))
+            user_id = cursor.fetchone()
+            cursor.close()
+            conn.close()
+            return user_id[0] if user_id else None
+    except psycopg2.Error as e:
+        print("Ошибка при получении ID пользователя по имени:", e)

@@ -45,13 +45,9 @@ def add_comment(text, user_id, post_id):
             """
             cursor.execute(insert_query, (text, user_id, post_id))
             conn.commit()
-            new_comment = cursor.fetchone()  # Получаем данные о новом комментарии
             cursor.close()
             conn.close()
-            if new_comment:
-                return new_comment  # Возвращаем данные о комментарии
-            else:
-                return None  # Если данные о пользователе не найдены
+            return True
     except psycopg2.Error as e:
         print("Ошибка при добавлении комментария:", e)
         return False  # Ошибка при добавлении
@@ -121,13 +117,13 @@ def update_comment(comment_id, new_text):
         print("Ошибка при обновлении информации о комментарями:", e)
         return False  # Ошибка при обновлении
         
-# Функция для получения всех комментариев к посту с сортировкой по дате создания (по умолчанию по возрастанию)
-def get_comments_for_post(post_id, order_by="created_at ASC"):
+# Функция для получения всех комментариев к посту 
+def get_comments_for_post(post_id):
     try:
         conn = connect_to_database()
         if conn:
             cursor = conn.cursor()
-            select_query = f"SELECT * FROM comments WHERE post_id = %s ORDER BY {order_by}"
+            select_query = f"SELECT * FROM comments WHERE post_id = %s"
             cursor.execute(select_query, (post_id,))
             comments = cursor.fetchall()
             cursor.close()
@@ -135,3 +131,23 @@ def get_comments_for_post(post_id, order_by="created_at ASC"):
             return comments
     except psycopg2.Error as e:
         print("Ошибка при получении комментариев:", e)
+        
+def get_comment_id_by_text_title_user(text, title, user_id):
+    try:
+        conn = connect_to_database()
+        if conn:
+            cursor = conn.cursor()
+            select_query = """
+            SELECT c.id
+            FROM comments c
+            INNER JOIN posts p ON c.post_id = p.id
+            INNER JOIN users u ON c.user_id = u.id
+            WHERE c.text = %s AND p.title = %s AND u.id = %s
+            """
+            cursor.execute(select_query, (text, title, user_id))
+            comment_id = cursor.fetchone()
+            cursor.close()
+            conn.close()
+            return comment_id[0] if comment_id else None
+    except psycopg2.Error as e:
+        print("Ошибка при получении ID комментария:", e)

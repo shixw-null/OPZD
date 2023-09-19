@@ -119,7 +119,7 @@ def update_post(post_id, new_title, new_content):
         return False  # Ошибка при обновлении
         
 # Функция для получения всех постов с сортировкой по дате публикации (по умолчанию по возрастанию)
-def get_all_posts_sort(order_by="created_at ASC"):
+def get_all_posts_sort(order_by="ASC"):
     try:
         conn = connect_to_database()
         if conn:
@@ -146,3 +146,21 @@ def drop_post_table():
             return True
     except psycopg2.Error as e:
         print("Ошибка при удалении таблицы постов:", e)
+        
+def get_post_id_by_content_title_user_id(title, content, user_id):
+    try:
+        conn = connect_to_database()
+        if conn:
+            cursor = conn.cursor()
+            select_query = """
+            SELECT id FROM posts
+            WHERE content = %s AND title = %s AND user_id = %s
+            """
+            cursor.execute(select_query, (content, title, user_id))
+            post_id = cursor.fetchone()
+            cursor.close()
+            conn.close()
+            return post_id[0] if post_id else None
+    except psycopg2.Error as e:
+        print("Ошибка при получении ID поста:", e)
+
