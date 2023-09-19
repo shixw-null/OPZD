@@ -1,35 +1,50 @@
 import unittest
-from posts import create_post_table, add_post, get_post_by_id, delete_post, update_post, drop_post_table
+from posts import create_post_table, add_post, get_post_by_id, delete_post, update_post, drop_post_table, get_post_id_by_content_title_user_id
+import users
 
 class TestPostFunctions(unittest.TestCase):
 
     def test_add_post(self):
-        create_post_table()
         # Проверка успешного добавления поста
-        result = add_post("Заголовок", "Содержание", 1)  # 1 - это user_id, который существует
+        users.add_user("john_doe", "john@example.com", "1990-01-15")
+        user_id = users.get_user_id_by_username("john_doe")
+        result = add_post("Заголовок", "Содержание", user_id)
         self.assertTrue(result)  # Проверяем, что функция возвращает True
-        drop_post_table()
+        
+        delete_post(get_post_id_by_content_title_user_id("Заголовок", "Содержание", user_id))
+        users.delete_user(user_id)
 
     def test_get_post_by_id(self):
-        create_post_table()
         # Проверка получения поста по ID после добавления
-        add_post("Заголовок", "Содержание", 1)
-        self.assertIsNotNone(get_post_by_id(1))  # Проверяем, что данные о посте не равны None
-        drop_post_table()
+        users.add_user("john_doe", "john@example.com", "1990-01-15")
+        user_id = users.get_user_id_by_username("john_doe")
+        add_post("Заголовок", "Содержание", user_id)
+        self.assertIsNotNone(get_post_id_by_content_title_user_id("Заголовок", "Содержание", user_id))  # Проверяем, что данные о посте не равны None
+        
+        delete_post(get_post_id_by_content_title_user_id("Заголовок", "Содержание", user_id))
+        users.delete_user(user_id)
 
     def test_delete_post(self):
-        create_post_table()
         # Проверка успешного удаления поста
-        add_post("Заголовок", "Содержание", 1)
-        self.assertTrue(delete_post(1))  # Проверяем, что функция возвращает True
-        drop_post_table()
-
+        users.add_user("john_doe", "john@example.com", "1990-01-15")
+        user_id = users.get_user_id_by_username("john_doe")
+        add_post("Заголовок", "Содержание", user_id)
+        self.assertTrue(delete_post(get_post_id_by_content_title_user_id("Заголовок", "Содержание", user_id)))  # Проверяем, что функция возвращает True
+        
+        delete_post(get_post_id_by_content_title_user_id("Заголовок", "Содержание", user_id))
+        users.delete_user(user_id)
+        
     def test_update_post(self):
-        create_post_table()
         # Проверка успешного обновления поста
-        add_post("Заголовок", "Содержание", 1)
-        self.assertTrue(update_post(1, "Новый заголовок", "Новое содержание"))  # Проверяем, что функция возвращает True
-        drop_post_table()
-
+        users.add_user("john_doe", "john@example.com", "1990-01-15")
+        user_id = users.get_user_id_by_username("john_doe")
+        add_post("Заголовок", "Содержание", user_id)
+        post_id = get_post_id_by_content_title_user_id("Заголовок", "Содержание", user_id)
+        
+        self.assertTrue(update_post(post_id, "Новый заголовок", "Новое содержание"))  # Проверяем, что функция возвращает True
+        
+        delete_post(get_post_id_by_content_title_user_id("Новый заголовок", "Новое содержание", user_id))
+        users.delete_user(user_id)
+        
 if __name__ == '__main__':
     unittest.main()
