@@ -1,19 +1,12 @@
-import psycopg2
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from models import Base, Employee, Position, TimeTrack, Equipment, EmployeeEquipment
 
-# Параметры подключения к базе данных PostgreSQL
-db_params = {
-    'dbname': 'test',
-    'user': 'postgres',
-    'password': 'postgres',
-    'host': 'localhost',
-    'port': '5432',  # Порт PostgreSQL
-}
+DATABASE_URL = "postgresql://postgres:postgres@localhost:5432/test"
 
-# Функция для установления соединения с базой данных
-def connect_to_database():
-    try:
-        conn = psycopg2.connect(**db_params)
-        return conn
-    except psycopg2.Error as e:
-        print("Ошибка подключения к базе данных:", e)
-        return None
+engine = create_engine(DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+def init_db():
+    # Пытаемся подключиться к БД и создать таблицы
+    Base.metadata.create_all(bind=engine)
