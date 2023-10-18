@@ -21,72 +21,49 @@ class TestTimeTrackModel(unittest.TestCase):
         return employee
 
     def test_get_timetrack(self):
-        # Тест получения записи учета времени по ID
         employee = self.create_employee()
         timetrack = TimeTrack(employee_id=employee.id, worked_hours=8)
         self.timetrack_method.save(timetrack)
-
         retrieved_timetrack = self.timetrack_method.get(timetrack.id)
         self.assertEqual(retrieved_timetrack.worked_hours, 8)
 
-        self.timetrack_method.delete(timetrack)
-        self.session.delete(employee)
-
     def test_find_timetrack_by_hours(self):
-        # Тест поиска записи учета времени по количеству часов
         employee = self.create_employee()
         timetrack = TimeTrack(employee_id=employee.id, worked_hours=5)
         self.timetrack_method.save(timetrack)
-
         found_timetracks = self.timetrack_method.find(worked_hours=5)
         self.assertEqual(len(found_timetracks), 1)
         self.assertEqual(found_timetracks[0].worked_hours, 5)
 
-        self.timetrack_method.delete(timetrack)
-        self.session.delete(employee)
-
     def test_get_all_timetracks(self):
-        # Тест получения всех записей учета времени
         employee = self.create_employee()
         timetracks = [TimeTrack(employee_id=employee.id, worked_hours=i) for i in range(3)]
         for timetrack in timetracks:
             self.timetrack_method.save(timetrack)
-
         all_timetracks = self.timetrack_method.get_all()
         self.assertEqual(len(all_timetracks), len(timetracks))
 
-        for timetrack in timetracks:
-            self.timetrack_method.delete(timetrack)
-        self.session.delete(employee)
-
     def test_update_timetrack(self):
-        # Тест обновления записи учета времени
         employee = self.create_employee()
         timetrack = TimeTrack(employee_id=employee.id, worked_hours=4)
         self.timetrack_method.save(timetrack)
-
         timetrack.worked_hours = 7
         self.timetrack_method.save(timetrack)
-
         updated_timetrack = self.timetrack_method.get(timetrack.id)
         self.assertEqual(updated_timetrack.worked_hours, 7)
 
-        self.timetrack_method.delete(timetrack)
-        self.session.delete(employee)
-
     def test_delete_timetrack(self):
-        # Тест удаления записи учета времени
         employee = self.create_employee()
         timetrack = TimeTrack(employee_id=employee.id, worked_hours=6)
         self.timetrack_method.save(timetrack)
-
         self.timetrack_method.delete(timetrack)
         deleted_timetrack = self.timetrack_method.get(timetrack.id)
         self.assertIsNone(deleted_timetrack)
 
-        self.session.delete(employee)
-
     def tearDown(self):
+        self.session.query(TimeTrack).delete()
+        self.session.query(Employee).delete()
+        self.session.commit()
         self.session.close()
 
 if __name__ == '__main__':

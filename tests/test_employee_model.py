@@ -1,4 +1,3 @@
-### Для корректного импорта ###
 import sys
 sys.path.append("D:/Документы/Учеба/Учеба_5к1с/ОПЗБД/SQLAlchemy")
 
@@ -20,7 +19,6 @@ class TestEmployeeModel(unittest.TestCase):
         self.employee_method.save(employee)
         retrieved_employee = self.employee_method.get(employee.id)
         self.assertEqual(retrieved_employee.first_name, "Иван")
-        self.employee_method.delete(employee)
 
     def test_find_existing_employee(self):
         # Тест поиска существующего сотрудника по имени
@@ -29,7 +27,6 @@ class TestEmployeeModel(unittest.TestCase):
         employees = self.employee_method.find(first_name="Анна")
         self.assertEqual(len(employees), 1)
         self.assertEqual(employees[0].last_name, "Сергеева")
-        self.employee_method.delete(employee)
 
     def test_get_all_employees(self):
         # Тест получения всех сотрудников
@@ -42,8 +39,6 @@ class TestEmployeeModel(unittest.TestCase):
             self.employee_method.save(employee)
         all_employees = self.employee_method.get_all()
         self.assertEqual(len(all_employees), 3)
-        for employee in employees:
-            self.employee_method.delete(employee)
 
     def test_update_employee(self):
         # Тест обновления сотрудника
@@ -53,7 +48,6 @@ class TestEmployeeModel(unittest.TestCase):
         self.employee_method.save(employee)
         updated_employee = self.employee_method.get(employee.id)
         self.assertEqual(updated_employee.first_name, "Новое имя")
-        self.employee_method.delete(employee)
 
     def test_delete_existing_employee(self):
         # Тест удаления существующего сотрудника
@@ -64,6 +58,8 @@ class TestEmployeeModel(unittest.TestCase):
         self.assertIsNone(deleted_employee)
 
     def tearDown(self):
+        self.session.query(Employee).delete()
+        self.session.commit()
         self.session.close()
 
 if __name__ == '__main__':
